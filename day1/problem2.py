@@ -1,8 +1,5 @@
-import math
-
-
 def get_recursive_fuel(mass):
-    fuel = math.floor(mass / 3) - 2
+    fuel = (mass // 3) - 2
     if fuel < 0:
         return 0
 
@@ -18,6 +15,5 @@ if __name__ == '__main__':
 
     in_file = open('input.txt', 'r')
     masses = [int(line) for line in in_file]
-
     total_fuel = sum([get_recursive_fuel(mass) for mass in masses])
     print(total_fuel)

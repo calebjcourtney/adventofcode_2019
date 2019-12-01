@@ -1,8 +1,5 @@
-import math
-
-
 def get_fuel(mass):
-    return math.floor(mass / 3) - 2
+    return (mass // 3) - 2
 
 
 if __name__ == '__main__':
@@ -13,6 +10,5 @@ if __name__ == '__main__':
 
     in_file = open('input.txt', 'r')
     masses = [int(line) for line in in_file]
-
     total_fuel = sum([get_fuel(mass) for mass in masses])
     print(total_fuel)
