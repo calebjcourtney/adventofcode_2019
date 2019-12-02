@@ -1,6 +1,3 @@
-import copy
-
-
 def process_opcodes(num_list):
     """
     Args:
@@ -57,7 +54,7 @@ if __name__ == '__main__':
             if out_noun != -1:
                 continue
 
-            in_list = copy.deepcopy(num_list)
+            in_list = num_list[:]
             in_list[1] = noun
             in_list[2] = verb
 
