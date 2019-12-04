@@ -1,20 +1,19 @@
-def has_two_adjacent_digits(text):
+from collections import Counter
+
+
+def has_two_adjacent_digits(text: str) -> bool:
     for x in range(10):
-        if '{}{}'.format(x, x) in text:
+        if f'{x}{x}' in text:
             return True
 
     return False
 
 
-def has_only_two_adjacents(text):
-    for x in range(10):
-        if '{}{}'.format(x, x) in text and '{}{}{}'.format(x, x, x) not in text:
-            return True
-
-    return False
+def has_at_least_two_of_same_number(text: str) -> bool:
+    return 2 in Counter(text).values()  # thanks coandco for the idea here
 
 
-def never_decreasing(text):
+def string_never_decreasing(text: str) -> bool:
     for x in range(len(text) - 1):
         if text[x + 1] < text[x]:
             return False
@@ -22,24 +21,16 @@ def never_decreasing(text):
     return True
 
 
-def part_one_criteria(text):
-    if not has_two_adjacent_digits(text):
+def part_one_criteria(text: str) -> bool:
+    # never decreasing runs faster, so this goes first
+    if not string_never_decreasing(text):
         return False
 
-    if not never_decreasing(text):
-        return False
-
-    return True
+    return has_two_adjacent_digits(text)
 
 
-def part_two_criteria(text):
-    if not has_only_two_adjacents(text):
-        return False
-
-    if not never_decreasing(text):
-        return False
-
-    return True
+def part_two_criteria(text: str) -> bool:
+    return has_at_least_two_of_same_number(text)
 
 
 if __name__ == '__main__':
@@ -48,13 +39,10 @@ if __name__ == '__main__':
     assert(not part_one_criteria('223450'))
     assert(not part_one_criteria('123789'))
 
-    count = 0
-
+    part_one_passwords = []  # thanks for the idea coandco - this cuts runtime in half
     for x in range(264793, 803936):
         if part_one_criteria(str(x)):
-            count += 1
-
-    print("part one:", count)
+            part_one_passwords.append(str(x))
 
     # part two
     assert(part_two_criteria('112233'))
@@ -62,9 +50,9 @@ if __name__ == '__main__':
     assert(part_two_criteria('111122'))
 
     count = 0
-
-    for x in range(264793, 803936):
-        if part_two_criteria(str(x)):
+    for x in part_one_passwords:
+        if part_two_criteria(x):
             count += 1
 
-    print("part two:", count)
+    print("part one solution:", len(part_one_passwords))
+    print("part two solution:", count)
