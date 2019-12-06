@@ -1,6 +1,3 @@
-import copy
-
-
 def process_opcodes(num_list):
     """
     Args:
