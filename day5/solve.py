@@ -1,144 +1,103 @@
-arg_counts = {
-    1: 2,
-    2: 2,
-    3: 0,
-    4: 1,
-    5: 2,
-    6: 2,
-    7: 2,
-    8: 2,
-    99: 0
-}
+class IntCodeComputer:
+    def __init__(self, codes):
+        self.code = [x for x in codes]
+        self.inputs = []
+        self.outputs = []
+        self.cursorPos = 0
+        self.modes = []
+        self.opmapping = {
+            1: self.op_add,
+            2: self.op_mutliplication,
+            3: self.op_input,
+            4: self.op_output,
+            5: self.op_jumpiftrue,
+            6: self.op_jumpiffalse,
+            7: self.op_lessthan,
+            8: self.op_equals
+        }
 
-has_output = {
-    1: True,
-    2: True,
-    3: True,
-    4: False,
-    5: False,
-    6: False,
-    7: True,
-    8: True,
-    99: False
-}
+    def value(self, arg, mode):
+        return arg if mode else self.code[arg]
 
+    def input(self, input):
+        # this allows for multiple inputs into the program
+        self.inputs.append(input)
+        return self
 
-def parse_modes(instruction):
-    # get the modes being used
-    mode = []
-    mode.append(instruction % 1000 // 100)
-    mode.append(instruction % 10000 // 1000)
-    mode.append(instruction % 100000 // 10000)
+    def run(self):
+        while True:
+            mode, op = divmod(self.code[self.cursorPos], 100)
+            self.cursorPos += 1
 
-    return mode
+            self.modes = [int(x) for x in reversed(str(mode))] + [0, 0, 0]
 
+            if op in self.opmapping:
+                self.opmapping[op]()
 
-def op_add(loc, op_inputs, index_point):
-    DATA[loc] = op_inputs[0] + op_inputs[1]
-    return index_point
+            # opcode 99: halt
+            elif op == 99:
+                break
 
+        return self.outputs[-1]
 
-def op_mutliplication(loc, op_inputs, index_point):
-    DATA[loc] = op_inputs[0] * op_inputs[1]
-    return index_point
+    def op_add(self):
+        # opcode 1: add(arg1, arg2) -> arg3
+        arg1, arg2, pos = self.code[self.cursorPos:self.cursorPos + 3]
+        self.code[pos] = self.value(arg1, self.modes[0]) + self.value(arg2, self.modes[1])
+        self.cursorPos += 3
 
+    def op_mutliplication(self):
+        # opcode 2: multiply(arg1, arg2) -> arg2
+        arg1, arg2, pos = self.code[self.cursorPos:self.cursorPos + 3]
+        self.code[pos] = self.value(arg1, self.modes[0]) * self.value(arg2, self.modes[1])
+        self.cursorPos += 3
 
-def op_input(loc, op_inputs, index_point):
-    DATA[loc] = input_instruction
-    return index_point
+    def op_input(self):
+        # opcode 2: multiply(arg1, arg2) -> arg2
+        pos = self.code[self.cursorPos]
+        self.code[pos] = self.inputs.pop(0)  # this was taken from  Peter200lx who had the inputs `pop` each time
+        self.cursorPos += 1
 
+    def op_output(self):
+        pos = self.code[self.cursorPos]
+        self.outputs.append(self.value(pos, self.modes[0]))
+        self.cursorPos += 1
 
-def op_output(loc, op_inputs, index_point):
-    outputs.append(op_inputs[0])
-    return index_point
+    def op_jumpiftrue(self):
+        arg1, arg2 = self.code[self.cursorPos:self.cursorPos + 2]
+        self.cursorPos += 2
 
+        if self.value(arg1, self.modes[0]) != 0:
+            self.cursorPos = self.value(arg2, self.modes[1])
 
-def op_jumpiftrue(loc, op_inputs, index_point):
-    if op_inputs[0] != 0:
-        index_point = op_inputs[1]
+    def op_jumpiffalse(self):
+        arg1, arg2 = self.code[self.cursorPos:self.cursorPos + 2]
+        self.cursorPos += 2
 
-    return index_point
+        if self.value(arg1, self.modes[0]) == 0:
+            self.cursorPos = self.value(arg2, self.modes[1])
 
+    def op_lessthan(self):
+        arg1, arg2, pos = self.code[self.cursorPos:self.cursorPos + 3]
+        self.code[pos] = 1 if self.value(arg1, self.modes[0]) < self.value(arg2, self.modes[1]) else 0
+        self.cursorPos += 3
 
-def op_jumpiffalse(loc, op_inputs, index_point):
-    if op_inputs[0] == 0:
-        index_point = op_inputs[1]
-
-    return index_point
-
-
-def op_lessthan(loc, op_inputs, index_point):
-    DATA[loc] = 1 if op_inputs[0] < op_inputs[1] else 0
-    return index_point
-
-
-def op_equals(loc, op_inputs, index_point):
-    DATA[loc] = 1 if op_inputs[0] == op_inputs[1] else 0
-    return index_point
-
-
-def op_kill(loc, op_inputs, index_point):
-    return None
-
-
-op_function = {
-    1: op_add,
-    2: op_mutliplication,
-    3: op_input,
-    4: op_output,
-    5: op_jumpiftrue,
-    6: op_jumpiffalse,
-    7: op_lessthan,
-    8: op_equals,
-    99: op_kill
-}
+    def op_equals(self):
+        arg1, arg2, pos = self.code[self.cursorPos:self.cursorPos + 3]
+        self.code[pos] = 1 if self.value(arg1, self.modes[0]) == self.value(arg2, self.modes[1]) else 0
+        self.cursorPos += 3
 
 
-def process_index(index_point):
-    instruction = DATA[index_point]
-    op_code = instruction % 100
+def run():
+    input_file = open('input.txt', 'r')
+    codes = [int(x) for x in input_file.read().split(",")]
 
-    mode = parse_modes(instruction)
+    signal = IntCodeComputer(codes).input(1).run()
+    print(f"first solution: {signal}")
 
-    index_point += 1
-
-    # get the inputs for the opcode
-    op_inputs = []
-    for i in range(arg_counts[op_code]):
-        op_inputs.append(DATA[index_point] if mode[i] == 1 else DATA[DATA[index_point]])
-        index_point += 1
-
-    loc = None
-
-    # has an output location
-    if has_output[op_code]:
-        loc = DATA[index_point] if mode[-1] == 0 else None
-        index_point += 1
-
-    index_point = op_function[op_code](loc, op_inputs, index_point)
-
-    return index_point
+    signal = IntCodeComputer(codes).input(5).run()
+    print(f"first solution: {signal}")
 
 
 if __name__ == '__main__':
-    # part one
-    DATA = [int(val) for val in open('input.txt').read().split(',')]
-    input_instruction = 1
-    outputs = [0]
-
-    index_point = 0
-    while outputs[-1] == 0 and index_point is not None:
-        index_point = process_index(index_point)
-
-    print(f"part one answer: {outputs[-1]}")
-
-    # part two
-    input_instruction = 5
-    outputs = [0]
-    DATA = [int(val) for val in open('input.txt').read().split(',')]
-
-    index_point = 0
-    while outputs[-1] == 0 and index_point is not None:
-        index_point = process_index(index_point)
-
-    print(f"part two answer: {outputs[-1]}")
+    run()
