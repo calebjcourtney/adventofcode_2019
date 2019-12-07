@@ -11,15 +11,15 @@ arg_counts = {
 }
 
 has_output = {
-    1: 1,
-    2: 1,
-    3: 1,
-    4: 0,
-    5: 0,
-    6: 0,
-    7: 1,
-    8: 1,
-    99: 0
+    1: True,
+    2: True,
+    3: True,
+    4: False,
+    5: False,
+    6: False,
+    7: True,
+    8: True,
+    99: False
 }
 
 
