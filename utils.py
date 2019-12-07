@@ -1,9 +1,14 @@
 from collections import Counter
 import networkx as nx
-from typing import List
+from typing import List, Dict, Tuple, Sequence, Mapping
+
+
+def read_data() -> str:
+    return open('input.txt', 'r').read()
 
 
 # DAY 1 #
+
 def get_recursive_fuel(mass: int) -> int:
     # from day 1, calculates the fuel (recursively) required based on mass size given
     fuel = (mass // 3) - 2
@@ -11,6 +16,7 @@ def get_recursive_fuel(mass: int) -> int:
 
 
 #### DAY 4 ####
+
 def has_adjacent_characters(text: str, count: int = 2) -> bool:
     # checks to see if there are two characters next to each other
     c = "".join([key for key, value in Counter(text).items() if value == count])
@@ -36,6 +42,7 @@ def string_never_decreasing(text: str) -> bool:
 
 
 ###### DAY 6 ######
+
 def count_orbit_connections(input_data: List[List]):
     graph = nx.DiGraph()
     graph.add_edges_from(input_data)
@@ -62,7 +69,103 @@ def get_distance_between_objects(input_data: List[List], first_object: str, seco
     return len(path)
 
 
+############### DAYS 2, 5, 7 - will probably be heavily used ################
+
+
+class IntCodeComputer:
+    def __init__(self, codes):
+        self.code = [x for x in codes]
+        self.inputs = []
+        self.secondary_input = 0
+        self.outputs = []
+        self.cursorPos = 0
+        self.modes = []
+        self.opmapping = {  # note that 4 is missing
+            1: self.op_add,
+            2: self.op_mutliplication,
+            3: self.op_input,
+            5: self.op_jumpiftrue,
+            6: self.op_jumpiffalse,
+            7: self.op_lessthan,
+            8: self.op_equals
+        }
+
+    def value(self, arg, mode):
+        return arg if mode else self.code[arg]
+
+    def input(self, input):
+        # this allows for multiple inputs into the program
+        self.inputs.append(input)
+        return self
+
+    def run(self):
+        while True:
+            mode, op = divmod(self.code[self.cursorPos], 100)
+            self.cursorPos += 1
+
+            self.modes = [int(x) for x in reversed(str(mode))] + [0, 0, 0]
+
+            if op in self.opmapping:
+                self.opmapping[op]()
+
+            if op == 4:
+                return self.op_output()
+
+            elif op == 99:
+                return None
+
+        return None
+
+    def op_add(self):
+        arg1, arg2, pos = self.code[self.cursorPos:self.cursorPos + 3]
+        self.code[pos] = self.value(arg1, self.modes[0]) + self.value(arg2, self.modes[1])
+        self.cursorPos += 3
+
+    def op_mutliplication(self):
+        arg1, arg2, pos = self.code[self.cursorPos:self.cursorPos + 3]
+        self.code[pos] = self.value(arg1, self.modes[0]) * self.value(arg2, self.modes[1])
+        self.cursorPos += 3
+
+    def op_input(self):
+        pos = self.code[self.cursorPos]
+        try:
+            self.code[pos] = self.inputs.pop(0)  # this was taken from  Peter200lx who had the inputs `pop` each time
+        except IndexError:
+            self.code[pos] = self.secondary_input
+
+        self.cursorPos += 1
+
+    def op_output(self):
+        pos = self.code[self.cursorPos]
+        return self.value(pos, self.modes[0])
+
+    def op_jumpiftrue(self):
+        arg1, arg2 = self.code[self.cursorPos:self.cursorPos + 2]
+        self.cursorPos += 2
+
+        if self.value(arg1, self.modes[0]) != 0:
+            self.cursorPos = self.value(arg2, self.modes[1])
+
+    def op_jumpiffalse(self):
+        arg1, arg2 = self.code[self.cursorPos:self.cursorPos + 2]
+        self.cursorPos += 2
+
+        if self.value(arg1, self.modes[0]) == 0:
+            self.cursorPos = self.value(arg2, self.modes[1])
+
+    def op_lessthan(self):
+        arg1, arg2, pos = self.code[self.cursorPos:self.cursorPos + 3]
+        self.code[pos] = 1 if self.value(arg1, self.modes[0]) < self.value(arg2, self.modes[1]) else 0
+        self.cursorPos += 3
+
+    def op_equals(self):
+        arg1, arg2, pos = self.code[self.cursorPos:self.cursorPos + 3]
+        self.code[pos] = 1 if self.value(arg1, self.modes[0]) == self.value(arg2, self.modes[1]) else 0
+        self.cursorPos += 3
+
+
 ########################## TESTS ##########################
+
 def test_recursivefuel():
     assert(get_recursive_fuel(12) == 2)
     assert(get_recursive_fuel(14) == 2)
