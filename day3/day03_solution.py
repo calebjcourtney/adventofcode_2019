@@ -1,3 +1,11 @@
+direction_mapping = {
+    'R': (0, 1),
+    'L': (0, -1),
+    'U': (1, 1),
+    'D': (1, -1)
+}
+
+
 def get_points_steps(in_text: str, point = None) -> tuple:
     points = []
     steps = 0
@@ -7,41 +15,13 @@ def get_points_steps(in_text: str, point = None) -> tuple:
         if (cursor[0], cursor[1]) == point:
             break
 
-        if code[0] == 'R':
-            for x in range(int(code[1:])):
-                cursor[0] += 1
-                points.append((cursor[0], cursor[1]))
-                steps += 1
+        for x in range(int(code[1:])):
+            cursor[direction_mapping[code[0]][0]] += direction_mapping[code[0]][1]
+            points.append((cursor[0], cursor[1]))
+            steps += 1
 
-                if (cursor[0], cursor[1]) == point:
-                    break
-
-        elif code[0] == 'L':
-            for x in range(int(code[1:])):
-                cursor[0] -= 1
-                points.append((cursor[0], cursor[1]))
-                steps += 1
-
-                if (cursor[0], cursor[1]) == point:
-                    break
-
-        elif code[0] == 'U':
-            for x in range(int(code[1:])):
-                cursor[1] += 1
-                points.append((cursor[0], cursor[1]))
-                steps += 1
-
-                if (cursor[0], cursor[1]) == point:
-                    break
-
-        elif code[0] == 'D':
-            for x in range(int(code[1:])):
-                cursor[1] -= 1
-                points.append((cursor[0], cursor[1]))
-                steps += 1
-
-                if (cursor[0], cursor[1]) == point:
-                    break
+            if (cursor[0], cursor[1]) == point:
+                break
 
         if (cursor[0], cursor[1]) == point:
             break
