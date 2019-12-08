@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-
 import itertools
-
 from utils import IntCodeComputer
 
 
@@ -49,7 +46,7 @@ def part_two_solution(codes):
     return max_output
 
 
-def run():
+if __name__ == '__main__':
     test_1 = [int(x) for x in "3,15,3,16,1002,16,10,16,1,16,15,15,4,15,99,0,0".split(',')]
     answer_1 = 43210
     assert(part_one_solution(test_1) == answer_1)
@@ -78,7 +75,3 @@ def run():
 
     output = part_two_solution(codes)
     print(f"Part two solution: {output}")
-
-
-if __name__ == '__main__':
-    run()
