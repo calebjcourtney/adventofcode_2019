@@ -2,14 +2,12 @@ from collections import Counter
 
 
 def solve_part_one(data):
+    split_data = [data[(25 * 6 * x):(25 * 6 * (x + 1))] for x in range(int(len(data) / (25 * 6)))]
     output = 0
     zero_count = None
-    for x in range(int(len(data) / (25 * 6))):
-        start = 25 * 6 * x
-        end = 25 * 6 * (x + 1)
-        temp_data = data[start:end]
 
-        c = Counter(temp_data)
+    for section in split_data:
+        c = Counter(section)
         if zero_count is None:
             zero_count = c['0']
             output = c['1'] * c['2']
@@ -22,7 +20,7 @@ def solve_part_one(data):
 
 
 def solve_part_two(data):
-    split_data = [data[25 * 6 * x:25 * 6 * (x + 1)] for x in range(int(len(data) / (25 * 6)))]
+    split_data = [data[(25 * 6 * x):(25 * 6 * (x + 1))] for x in range(int(len(data) / (25 * 6)))]
     output_layer = ''
     for x in range(len(split_data[0])):
         for layer in split_data:
