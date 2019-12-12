@@ -86,9 +86,11 @@ def step(moons: List[Moon]) -> List[Moon]:
 
 
 def part_one_solution(moons):
+    # shift the moons one step at a time 1000 times
     for _ in range(1000):
         moons = step(moons)
 
+    # get the total energies
     total_energy = 0
     for moon in moons:
         total_energy += moon.calculate_total_energy()
@@ -101,14 +103,14 @@ def least_common_multiple(x, y):
 
 
 def part_two_solution(moons):
+    # check the x, y, and z axes for when the last time it was they repeated the same position and velocity
+    # then find the least common multiple between those three times
+
     seen_x, seen_y, seen_z = set(), set(), set()
     repeat_x, repeat_y, repeat_z = None, None, None
     time = 0
 
-    while True:
-        if repeat_x is not None and repeat_y is not None and repeat_z is not None:
-            break
-
+    while repeat_x is None or repeat_y is None or repeat_z is None:
         moons = step(moons)
 
         if repeat_x is None:
