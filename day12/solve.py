@@ -1,9 +1,19 @@
 # from copy import deepcopy
 import math
+from typing import List
 
 
 class Moon:
-    def __init__(self, x, y, z, velocity_x=0, velocity_y=0, velocity_z=0):
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        z: int,
+        velocity_x: int = 0,
+        velocity_y: int = 0,
+        velocity_z: int = 0
+    ):
+
         self.x = x
         self.y = y
         self.z = z
@@ -12,7 +22,7 @@ class Moon:
         self.velocity_y = velocity_y
         self.velocity_z = velocity_z
 
-    def tick(self):
+    def shift_moon(self):
         self.x += self.velocity_x
         self.y += self.velocity_y
         self.z += self.velocity_z
@@ -26,45 +36,58 @@ class Moon:
     def calculate_total_energy(self):
         return self.calculate_potential_energy() * self.calculate_kinetic_energy()
 
-    def __repr__(self):
-        return f"pos=<x= {self.x}, y= {self.y}, z= {self.z}>, vel=<x= {self.velocity_x}, y= {self.velocity_y}, z= {self.velocity_z}"
 
-    @staticmethod
-    def apply_gravity(a, b):
-        if a.x > b.x:
-            a.velocity_x -= 1
-            b.velocity_x += 1
-        elif a.x < b.x:
-            a.velocity_x += 1
-            b.velocity_x -= 1
+def apply_gravity(moon_a, moon_b):
+    # change x values
+    if moon_a.x > moon_b.x:
+        moon_a.velocity_x -= 1
+        moon_b.velocity_x += 1
 
-        if a.y > b.y:
-            a.velocity_y -= 1
-            b.velocity_y += 1
-        elif a.y < b.y:
-            a.velocity_y += 1
-            b.velocity_y -= 1
+    elif moon_a.x < moon_b.x:
+        moon_a.velocity_x += 1
+        moon_b.velocity_x -= 1
 
-        if a.z > b.z:
-            a.velocity_z -= 1
-            b.velocity_z += 1
-        elif a.z < b.z:
-            a.velocity_z += 1
-            b.velocity_z -= 1
+    # change y values
+    if moon_a.y > moon_b.y:
+        moon_a.velocity_y -= 1
+        moon_b.velocity_y += 1
+
+    elif moon_a.y < moon_b.y:
+        moon_a.velocity_y += 1
+        moon_b.velocity_y -= 1
+
+    # change z values
+    if moon_a.z > moon_b.z:
+        moon_a.velocity_z -= 1
+        moon_b.velocity_z += 1
+
+    elif moon_a.z < moon_b.z:
+        moon_a.velocity_z += 1
+        moon_b.velocity_z -= 1
+
+
+def step(moons: List[Moon]) -> List[Moon]:
+    pairs = [
+        (0, 1), (0, 2), (0, 3),
+        (1, 2), (1, 3),
+        (2, 3)
+    ]
+
+    # calculate the velocities
+    for pair in pairs:
+        a, b = pair
+        apply_gravity(moons[a], moons[b])
+
+    # apply those velocities
+    for moon in moons:
+        moon.shift_moon()
+
+    return moons
 
 
 def part_one_solution(moons):
-    pairs = [(0, 1), (0, 2), (0, 3),
-             (1, 2), (1, 3),
-             (2, 3)]
-
-    for i in range(1000):
-        for pair in pairs:
-            a, b = pair
-            Moon.apply_gravity(moons[a], moons[b])
-
-        for moon in moons:
-            moon.tick()
+    for _ in range(1000):
+        moons = step(moons)
 
     total_energy = 0
     for moon in moons:
@@ -73,32 +96,20 @@ def part_one_solution(moons):
     return total_energy
 
 
-def lcm(x, y):
+def least_common_multiple(x, y):
     return x // math.gcd(x, y) * y
 
 
 def part_two_solution(moons):
     seen_x, seen_y, seen_z = set(), set(), set()
     repeat_x, repeat_y, repeat_z = None, None, None
-
-    # 318382803780324
-
-    pairs = [(0, 1), (0, 2), (0, 3),
-             (1, 2), (1, 3),
-             (2, 3)]
-
     time = 0
 
     while True:
         if repeat_x is not None and repeat_y is not None and repeat_z is not None:
             break
 
-        for pair in pairs:
-            a, b = pair
-            Moon.apply_gravity(moons[a], moons[b])
-
-        for moon in moons:
-            moon.tick()
+        moons = step(moons)
 
         if repeat_x is None:
             check_x = str([[moon.x, moon.velocity_x] for moon in moons])
@@ -123,7 +134,7 @@ def part_two_solution(moons):
 
         time += 1
 
-    return lcm(lcm(repeat_x, repeat_y), repeat_z)
+    return least_common_multiple(least_common_multiple(repeat_x, repeat_y), repeat_z)
 
 
 if __name__ == "__main__":
