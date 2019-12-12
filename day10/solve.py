@@ -15,8 +15,8 @@ def read(file):
         ]
 
 
-def get_angle(p1, p2):
-    return math.degrees(math.atan2(p1.x - p2.x, p1.y - p2.y) % (2 * math.pi))
+def get_angle(point_one, point_two):
+    return math.degrees(math.atan2(point_one.x - point_two.x, point_one.y - point_two.y) % (2 * math.pi))
 
 
 def solve_part_one(asteroids):
@@ -29,16 +29,21 @@ def solve_part_one(asteroids):
 
             angles[a1].add(get_angle(a1, a2))
 
-    return len(max(angles.values(), key=len))
+    base = None
+    angle_count = 0
+    for coords, angle_items in angles.items():
+        if len(angle_items) > angle_count:
+            base = coords
+            angle_count = len(angle_items)
+
+    return base, angle_count
 
 
-def get_distance(p1, p2):
-    return math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2)
+def get_distance(point_one, point_two):
+    return math.sqrt((point_one.x - point_two.x) ** 2 + (point_one.y - point_two.y) ** 2)
 
 
-def solve_part_two(asteroids):
-    base = Point(x=30, y=34)
-
+def solve_part_two(base, asteroids):
     asteroids.remove(base)
 
     angles = defaultdict(list)
@@ -68,5 +73,6 @@ def solve_part_two(asteroids):
 
 if __name__ == '__main__':
     asteroids = read("input.txt")
-    print(f"part 1 answer: {solve_part_one(asteroids)}")
-    print(f"part 2 answer: {solve_part_two(asteroids)}")
+    base, answer_1 = solve_part_one(asteroids)
+    print(f"part 1 answer: {answer_1}")
+    print(f"part 2 answer: {solve_part_two(base, asteroids)}")
