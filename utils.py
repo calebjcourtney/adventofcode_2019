@@ -77,11 +77,75 @@ def get_distance(point_one, point_two):
     return math.sqrt((point_one.x - point_two.x) ** 2 + (point_one.y - point_two.y) ** 2)
 
 
+############ DAY 12 ############
+def least_common_multiple(x, y):
+    return x // math.gcd(x, y) * y
+
+
+class Moon:
+    def __init__(
+        self,
+        x: int,
+        y: int,
+        z: int,
+        velocity_x: int = 0,
+        velocity_y: int = 0,
+        velocity_z: int = 0
+    ):
+
+        self.x = x
+        self.y = y
+        self.z = z
+
+        self.velocity_x = velocity_x
+        self.velocity_y = velocity_y
+        self.velocity_z = velocity_z
+
+    def shift_moon(self):
+        self.x += self.velocity_x
+        self.y += self.velocity_y
+        self.z += self.velocity_z
+
+    def calculate_potential_energy(self) -> int:
+        return abs(self.x) + abs(self.y) + abs(self.z)
+
+    def calculate_kinetic_energy(self) -> int:
+        return abs(self.velocity_x) + abs(self.velocity_y) + abs(self.velocity_z)
+
+    def calculate_total_energy(self) -> int:
+        return self.calculate_potential_energy() * self.calculate_kinetic_energy()
+
+    @staticmethod
+    def apply_gravity(moon_a, moon_b) -> None:
+        # change x values
+        if moon_a.x > moon_b.x:
+            moon_a.velocity_x -= 1
+            moon_b.velocity_x += 1
+
+        elif moon_a.x < moon_b.x:
+            moon_a.velocity_x += 1
+            moon_b.velocity_x -= 1
+
+        # change y values
+        if moon_a.y > moon_b.y:
+            moon_a.velocity_y -= 1
+            moon_b.velocity_y += 1
+
+        elif moon_a.y < moon_b.y:
+            moon_a.velocity_y += 1
+            moon_b.velocity_y -= 1
+
+        # change z values
+        if moon_a.z > moon_b.z:
+            moon_a.velocity_z -= 1
+            moon_b.velocity_z += 1
+
+        elif moon_a.z < moon_b.z:
+            moon_a.velocity_z += 1
+            moon_b.velocity_z -= 1
+
+
 ############### DAYS 2, 5, 7, 9, 11 - will probably be heavily used ################
-class KillIntCodeComputer(Exception):
-    pass
-
-
 class State(Enum):
     INIT = 1
     LIVE = 2
